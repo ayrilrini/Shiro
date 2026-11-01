@@ -90,6 +90,12 @@ COPY --from=builder /app/apps/web/.next/standalone ./
 COPY --from=builder /app/apps/web/.next/static ./apps/web/.next/static
 COPY --from=builder /app/apps/web/.next/server ./apps/web/.next/server
 
+# Server-side (SSR) reads NEXT_PUBLIC_* at RUNTIME — must exist in the runner
+# stage too (client bundle already inlines them at build time).
+ARG BASE_URL
+ENV NEXT_PUBLIC_API_URL=${BASE_URL}/api/v3 \
+    NEXT_PUBLIC_GATEWAY_URL=${BASE_URL}
+
 EXPOSE 2323
 
 ENV PORT=2323
