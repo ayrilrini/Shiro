@@ -11,7 +11,12 @@ WORKDIR /app
 
 COPY . .
 
-RUN npm install -g pnpm
+# Pin pnpm version: matches "packageManager" field; pnpm v11+/v12 changed the
+# global bin layout (entry moved from bin/pnpm.cjs to package root), which
+# breaks the symlink reuse in the builder stage below. Also use npmmirror for
+# faster installs in CN regions.
+RUN npm config set registry https://registry.npmmirror.com \
+  && npm install -g pnpm@10.27.0
 RUN pnpm install
 
 FROM base AS builder
@@ -21,10 +26,13 @@ RUN apk update && apk add --no-cache git
 WORKDIR /app
 COPY --from=deps /app/ .
 
-# Reuse pnpm installed in deps stage to avoid network flakiness
+# Reuse pnpm installed in deps stage to avoid network flakiness.
 COPY --from=deps /usr/local/lib/node_modules/pnpm /usr/local/lib/node_modules/pnpm
-RUN ln -sf ../lib/node_modules/pnpm/bin/pnpm.cjs /usr/local/bin/pnpm \
-  && ln -sf ../lib/node_modules/pnpm/bin/pnpx.cjs /usr/local/bin/pnpx
+# Absolute symlink targets + fail-fast check (pnpm <11 layout: bin/pnpm.cjs).
+RUN ln -sf /usr/local/lib/node_modules/pnpm/bin/pnpm.cjs /usr/local/bin/pnpm \
+  && ln -sf /usr/local/lib/node_modules/pnpm/bin/pnpx.cjs /usr/local/bin/pnpx \
+  && test -x /usr/local/lib/node_modules/pnpm/bin/pnpm.cjs \
+  && pnpm --version
 
 ENV NODE_ENV=production
 ARG BASE_URL
