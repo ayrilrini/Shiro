@@ -19,16 +19,13 @@ export const fetchAggregationData = async () => {
   const fetcher = async () => {
     // v14 响应为 { data, meta? } 信封：先解包再当作聚合对象使用，
     // 否则 seo/url/user 全部 undefined（generateMetadata 读 url.webUrl 即崩）
-    const res = (
-      await $fetch<{ data: AggregateRoot & { theme: AppThemeConfig } }>(
-        apiClient.aggregate.proxy.toString(true),
-        {
-          params: {
-            theme: 'shiro',
-          },
-        },
-      )
-    ).then(simpleCamelcaseKeys)
+    const res = await $fetch<{
+      data: AggregateRoot & { theme: AppThemeConfig }
+    }>(apiClient.aggregate.proxy.toString(true), {
+      params: {
+        theme: 'shiro',
+      },
+    }).then(simpleCamelcaseKeys)
 
     const data = unwrapV3Envelope<AggregateRoot & { theme: AppThemeConfig }>(
       res,
