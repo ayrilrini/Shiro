@@ -61,6 +61,9 @@ jobs:
         with:
           context: .
           push: true
+          # 阿里云 ACR 不接受 OCI attestation 的 application/vnd.oci.empty.v1+json
+          # （denied: unknown manifest class），必须禁用 provenance 证明
+          provenance: false
           # 前端运行时对外地址（NEXT_PUBLIC_* 构建期内联，改域名需同步改这里）
           build-args: |
             BASE_URL=https://www.voidink.tech
