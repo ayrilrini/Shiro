@@ -169,3 +169,13 @@ Shiro 监听的全部事件（`types/events.ts`）在 v14 `BusinessEvents` 中�
 ### 8.4 版本勘误
 
 - 实际安装的 `@mx-space/api-client` 为 **5.13.0**（文档原记 5.12.0）。
+
+### 8.5 部署期问题排查记录（2026-11-01）
+
+- **Dockerfile**：deps 阶段锁定 `pnpm@10.27.0`——pnpm v12 起全局包入口从 `bin/pnpm.cjs` 移到包根，builder 阶段复用软链会断链（`pnpm: not found`）；builder 软链改绝对路径并加自检。
+- **CI**：新增 `.github/workflows/docker-build.yml`（GitHub Actions → 阿里云 ACR 个人实例），含推送权限预检（hello-world 探测）、`provenance: false`（ACR 不接受 OCI attestation 的 empty JSON manifest）、registry/namespace 改用仓库 Variables（日志可见）。GHA 层缓存复用 apk/pnpm/字体层。
+- **Dockerfile runner 阶段**：补充 `NEXT_PUBLIC_API_URL`/`NEXT_PUBLIC_GATEWAY_URL` 运行时环境变量——SSR 侧 Next 在运行时读取 `process.env.NEXT_PUBLIC_*`（仅客户端包是构建期内联），缺失导致服务端 fetch 相对路径报 `ERR_INVALID_URL`。
+- **nginx 站点配置**（`/etc/nginx/sites-enabled/voidink.tech`）：`location /` 改指前端 2323；新增 `/api/v3`（透传前缀）与 `/ws/`（原生 WebSocket 升级头，v14 已无 socket.io）；备份为 `voidink.tech.bak-*`。
+- **mx-core 空站行为（上游设计）**：站点不存在任何可见手记时，`GET /api/v3/aggregate` 因 `note.service.getLatestNoteId` 抛 `NOT_FOUND` 而整体 404，导致 Shiro 首页聚合拉取失败——发布一篇手记即恢复，非适配问题。
+- **首页 500（`Cannot read properties of undefined (reading 'webUrl')`）**：`app/[locale]/api.tsx` 的 `fetchAggregationData` 用裸 `$fetch` 直取聚合接口但**漏做 V3 信封解包**（5+1 处裸 fetch 补丁中的漏网之鱼），layout 拿到 `{data:{...}}` 信封后解构 `url` 为 undefined。已补 `unwrapV3Envelope`——这是最后一个遗留解包点。
+- **最终验证（全部通过）**：首页 200（HTML 渲染）、`/api/v3/aggregate/site` 200（V3 信封）、`/ws/web` 101 升级成功。
