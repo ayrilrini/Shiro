@@ -39,12 +39,10 @@ const getNoteData = async (params: NoteParams, lang?: string) => {
 export const getData = async (params: NoteParams): Promise<NoteDataResult> => {
   // 如果指定了 lang=original，不传 lang 参数
   if (params.lang === 'original') {
-    const note = await getNoteData(params, 'original')
-    return { note }
+    return getNoteData(params, 'original')
   }
 
   const preferredLang = params.lang || params.locale
-  const note = await getNoteData(params, preferredLang || undefined)
 
-  return { note }
+  return getNoteData(params, preferredLang || undefined)
 }

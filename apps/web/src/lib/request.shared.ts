@@ -5,7 +5,7 @@ import type { FetchError } from 'ofetch'
  * v14 后端统一将响应包裹为 `{ data, meta? }` 信封（ResponseInterceptor）。
  * 绕过 api-client 的裸 fetch 需手动解包；兼容无信封的旧形态/异常响应。
  */
-export const unwrapV3Envelope = <T = any>(json: any): T => {
+export const unwrapV3Envelope = <T = any>(json?: any): T => {
   if (
     json !== null &&
     typeof json === 'object' &&

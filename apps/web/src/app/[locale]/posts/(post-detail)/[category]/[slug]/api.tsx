@@ -34,13 +34,10 @@ const getPostData = async (
 export const getData = async (params: PageParams): Promise<PostDataResult> => {
   // 如果指定了 lang=original，不传 lang 参数
   if (params.lang === 'original') {
-    const post = await getPostData(params, 'original')
-    return { post }
+    return getPostData(params, 'original')
   }
 
   const preferredLang = params.lang || params.locale
 
-  const post = await getPostData(params, preferredLang)
-
-  return { post }
+  return getPostData(params, preferredLang)
 }
