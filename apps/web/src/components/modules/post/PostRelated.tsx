@@ -28,7 +28,7 @@ export const PostRelated: FC<{
       </h3>
       <ul className="ml-0 mt-4 list-inside list-disc pl-0 text-base leading-relaxed">
         {related.map((post) => {
-          const href = `/posts/${post.category.slug}/${post.slug}`
+          const href = `/posts/${post.category?.slug}/${post.slug}`
           return (
             <li key={href}>
               <PeekLink href={href} className="shiro-link--underline">

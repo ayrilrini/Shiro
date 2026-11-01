@@ -54,7 +54,4 @@ export const createApiClient = (
 ) =>
   createClient(fetchAdapter)(API_URL, {
     controllers: allControllers,
-    getDataFromResponse(response) {
-      return response as any
-    },
   })

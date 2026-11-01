@@ -20,6 +20,7 @@ import { routing } from '~/i18n/routing'
 import { PreRenderError } from '~/lib/error-factory'
 import { sansFont, serifFont } from '~/lib/fonts'
 import { apiClient } from '~/lib/request'
+import { unwrapV3Envelope } from '~/lib/request.shared'
 import { AggregationProvider } from '~/providers/root/aggregation-data-provider'
 import { AppFeatureProvider } from '~/providers/root/app-feature-provider'
 import { HydrateuserAuthProvider } from '~/providers/root/hydrate-user-auth-provider'
@@ -202,7 +203,8 @@ export default async function LocaleLayout({ children, params }: Props) {
     { headers },
   )
     .then((res) => res.json())
-    .then((res) => !!res.ok)
+    // v14 后端统一 { data, meta? } 信封，需解包
+    .then((res) => !!unwrapV3Envelope<{ ok?: number }>(res)?.ok)
     .catch(() => false)
 
   return (
@@ -215,18 +217,18 @@ export default async function LocaleLayout({ children, params }: Props) {
             <Global />
             <SayHi />
             <HydrationEndDetector />
-            {themeConfig.config?.color && (
+            {themeConfig?.config?.color && (
               <AccentColorStyleInjector color={themeConfig.config.color} />
             )}
             <link
               rel="shortcut icon"
-              href={themeConfig.config.site.faviconDark}
+              href={themeConfig?.config?.site?.faviconDark}
               type="image/x-icon"
               media="(prefers-color-scheme: dark)"
             />
             <link
               rel="shortcut icon"
-              href={themeConfig.config.site.favicon}
+              href={themeConfig?.config?.site?.favicon}
               type="image/x-icon"
               media="(prefers-color-scheme: light)"
             />
@@ -241,7 +243,7 @@ export default async function LocaleLayout({ children, params }: Props) {
                 <WebAppProviders>
                   <AggregationProvider
                     aggregationData={data}
-                    appConfig={themeConfig.config}
+                    appConfig={themeConfig?.config}
                   />
                   <div id="root" data-theme>
                     <Root>{children}</Root>

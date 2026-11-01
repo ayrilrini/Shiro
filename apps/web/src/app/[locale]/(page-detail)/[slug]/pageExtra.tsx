@@ -116,7 +116,8 @@ export const PagePaginator = () => {
 export const MarkdownSelection: Component = (props) => {
   const id = useCurrentPageDataSelector((data) => data?.id)!
   const title = useCurrentPageDataSelector((data) => data?.title)!
-  const canComment = useCurrentPageDataSelector((data) => data?.allowComment)!
+  // v14 页面模型不再含 allowComment，默认开放
+  const canComment = true
   return (
     <WithArticleSelectionAction
       refId={id}

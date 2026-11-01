@@ -1,6 +1,5 @@
 'use client'
 
-import type { CommentModel } from '@mx-space/api-client'
 import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useRef } from 'react'
 
@@ -9,9 +8,8 @@ import { RelativeTime } from '~/components/ui/relative-time'
 import { ScrollArea } from '~/components/ui/scroll-area'
 
 import { CommentBoxRoot } from './CommentBox/Root'
+import type { CommentWithAnchor } from './thread'
 import type { CommentAnchor } from './types'
-
-type CommentWithAnchor = CommentModel & { anchor?: CommentAnchor }
 
 interface CommentBlockThreadProps {
   anchor: CommentAnchor
@@ -21,7 +19,8 @@ interface CommentBlockThreadProps {
 }
 
 function ThreadComment({ comment }: { comment: CommentWithAnchor }) {
-  const { avatar, author } = comment
+  const avatar = comment.avatar ?? undefined
+  const author = comment.author ?? ''
 
   return (
     <div className="flex gap-2 px-3 py-2">
@@ -39,7 +38,7 @@ function ThreadComment({ comment }: { comment: CommentWithAnchor }) {
             {author}
           </span>
           <span className="text-[11px] text-muted-foreground">
-            <RelativeTime date={comment.created} />
+            <RelativeTime date={comment.createdAt} />
           </span>
         </div>
         {comment.anchor?.mode === 'range' && (

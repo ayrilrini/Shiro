@@ -79,7 +79,7 @@ export const ActivityRecent = () => {
           <ul className="shiro-timeline mt-4 flex flex-col pb-8 pl-2">
             {flatData.map((activity) => (
               <li
-                key={`${activity.bizType}-${activity.id}-${activity.created}`}
+                key={`${activity.bizType}-${activity.id}-${activity.createdAt}`}
                 className="flex min-w-0 justify-between"
               >
                 <ActivityCard activity={activity} />

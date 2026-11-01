@@ -27,7 +27,6 @@ import {
   useRef,
   useState,
 } from 'react'
-import { Blurhash } from 'react-blurhash'
 import { tv } from 'tailwind-variants'
 
 import { useIsMobile } from '~/atoms/hooks/viewport'
@@ -35,7 +34,7 @@ import { LazyLoad } from '~/components/common/Lazyload'
 import { useIsUnMounted } from '~/hooks/common/use-is-unmounted'
 import { isDev, isServerSide } from '~/lib/env'
 import { clsxm } from '~/lib/helper'
-import { calculateDimensions } from '~/lib/image'
+import { calculateDimensions, thumbhashBase64ToDataUrl } from '~/lib/image'
 import { useMarkdownImageRecord } from '~/providers/article/MarkdownImageRecordProvider'
 
 import { Divider } from '../divider'
@@ -418,6 +417,9 @@ const Placeholder: FC<
 }) => {
   const imageMeta = useMarkdownImageRecord(src)
   const accentColor = accent || imageMeta?.accent
+  const thumbhashDataUrl = imageMeta?.thumbhash
+    ? thumbhashBase64ToDataUrl(imageMeta.thumbhash)
+    : undefined
 
   const scaledSize = useMemo(() => {
     let nextHeight = manualHeight
@@ -463,14 +465,14 @@ const Placeholder: FC<
         backgroundColor: accentColor,
       }}
     >
-      {imageMeta?.blurHash && (
-        <Blurhash
-          resolutionX={32}
-          resolutionY={32}
-          punch={1}
+      {thumbhashDataUrl && (
+        <img
+          src={thumbhashDataUrl}
+          alt=""
+          aria-hidden
           height={scaledSize.scaleHeight}
           width={scaledSize.scaleWidth}
-          hash={imageMeta.blurHash}
+          className="absolute inset-0 size-full object-cover"
         />
       )}
     </span>

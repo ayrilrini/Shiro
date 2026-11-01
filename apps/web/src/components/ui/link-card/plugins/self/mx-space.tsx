@@ -60,11 +60,12 @@ export const mxSpacePlugin: LinkCardPlugin = {
 
     if (type === 'posts') {
       const [cate, slug] = rest
-      data = await apiClient.post.getPost(cate, slug)
+      const post = await apiClient.post.getPost(cate, slug)
+      data = { ...post.$serialized, images: post.images ?? undefined }
     } else if (type === 'notes') {
       const [nid] = rest
-      const response = await apiClient.note.getNoteById(+nid)
-      data = response.data
+      const note = await apiClient.note.getNoteById(+nid)
+      data = { ...note, images: note.images ?? undefined }
     }
 
     const coverImage = data.cover || data.meta?.cover

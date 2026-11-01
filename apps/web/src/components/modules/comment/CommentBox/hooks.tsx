@@ -1,7 +1,7 @@
 'use client'
 
 import type {
-  CommentDto,
+  AnonymousCommentDto,
   CommentModel,
   RequestError,
 } from '@mx-space/api-client'
@@ -146,18 +146,18 @@ export const useSendComment = () => {
       const url = jotaiStore.get(urlAtom)
       const anchor = jotaiStore.get(anchorAtom)
 
-      const commentDto: CommentDto & { anchor?: CommentAnchor } = {
+      // v14 AnonymousCommentDto 已移除 source 字段
+      const commentDto: AnonymousCommentDto & { anchor?: CommentAnchor } = {
         text,
         author,
         mail,
         avatar,
-        source,
         url,
       }
       if (anchor) commentDto.anchor = anchor
 
       if (isLogged) {
-        delete commentDto.avatar
+        delete (commentDto as { avatar?: string }).avatar
       }
 
       // Omit empty string key
@@ -169,8 +169,8 @@ export const useSendComment = () => {
       // Reply Comment
       if (isReply) {
         if (isLogged) {
-          return apiClient.comment.proxy.owner
-            .reply(refId)
+          return apiClient.comment
+            .proxy('owner-reply')(refId)
             .post<CommentModel>({
               data: {
                 text,
@@ -180,7 +180,7 @@ export const useSendComment = () => {
             .then(wrappedCompletedCallback)
         } else {
           return apiClient.comment
-            .reply(refId, commentDto)
+            .guestReply(refId, commentDto)
             .then(wrappedCompletedCallback)
         }
       }
@@ -190,10 +190,10 @@ export const useSendComment = () => {
       const syncToRecently = jotaiStore.get(syncToRecentlyAtom)
 
       if (isLogged) {
-        return apiClient.comment.proxy.owner
-          .comment(refId)
-          .post<CommentModel>({
-            data: { text, source, ...(anchor ? { anchor } : {}) },
+        return apiClient.comment
+          .readerComment(refId, {
+            text,
+            ...(anchor ? { anchor } : {}),
           })
           .then(async (res) => {
             if (syncToRecently)
@@ -215,7 +215,7 @@ export const useSendComment = () => {
       // @ts-ignore
       commentDto.isWhispers = isWhisper
       return apiClient.comment
-        .comment(refId, commentDto)
+        .guestComment(refId, commentDto)
         .then(wrappedCompletedCallback)
     },
     mutationKey: [commentRefId, 'comment'],

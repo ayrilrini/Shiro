@@ -25,6 +25,7 @@ import { getWebUrl } from '~/atoms'
 import { useModalStack } from '~/components/ui/modal/stacked/provider'
 import { useIsDark } from '~/hooks/common/use-is-dark'
 import { fetchGitHubApi } from '~/lib/github'
+import { unwrapV3Envelope } from '~/lib/request.shared'
 
 const fallbackSansFont =
   "var(--app-font-sans, system-ui), -apple-system, 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', Roboto, Helvetica, 'noto sans sc', 'hiragino sans gb', sans-serif, Apple Color Emoji, Segoe UI Emoji, Not Color Emoji"
@@ -84,8 +85,10 @@ const linkCardFetchContext: LinkCardFetchContext = {
     },
     'mx-space': {
       request: async (path) => {
-        const r = await fetch(`/api/v2/${path}`)
-        return await r.json()
+        const r = await fetch(`/api/v3/${path}`)
+        const json = await r.json()
+        // v14 后端统一 { data, meta? } 信封，需解包
+        return unwrapV3Envelope(json)
       },
     },
   },

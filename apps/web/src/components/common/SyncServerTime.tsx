@@ -7,6 +7,7 @@ import { memo, useEffect } from 'react'
 import { useEventCallback } from '~/hooks/common/use-event-callback'
 import { useAccurateInterval } from '~/hooks/common/use-interval'
 import { apiClient } from '~/lib/request'
+import { unwrapV3Envelope } from '~/lib/request.shared'
 import { jotaiStore } from '~/lib/store'
 
 async function fetchTime() {
@@ -14,7 +15,8 @@ async function fetchTime() {
   const { t2, t3 } = await fetch(apiClient.proxy('server-time').toString(true))
     .then((res) => res.json())
     .then((time) => {
-      const { t3: response_time, t2: request_time } = time
+      // v14 后端统一 { data, meta? } 信封，需解包
+      const { t3: response_time, t2: request_time } = unwrapV3Envelope(time)
 
       return {
         t2: response_time,

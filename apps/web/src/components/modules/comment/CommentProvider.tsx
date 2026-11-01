@@ -1,9 +1,6 @@
 import type {
-  CommentModel,
-  PaginateResult,
   ReaderModel,
 } from '@mx-space/api-client'
-import type { InfiniteData } from '@tanstack/react-query'
 import { createContextState } from 'foxact/create-context-state'
 import type { PrimitiveAtom } from 'jotai'
 import { atom, useAtomValue } from 'jotai'
@@ -46,11 +43,7 @@ export const [
 export const CommentProvider: FC<{
   refId: string
   children: (
-    data: InfiniteData<
-      PaginateResult<CommentModel & { ref: string }> & {
-        readers: Record<string, ReaderModel>
-      }
-    >,
+    data: CommentThreadInfiniteData,
     commentAtom: PrimitiveAtom<Record<string, CommentThreadViewItem>>,
   ) => ReactNode
 }> = ({ children, refId }) => {
@@ -102,7 +95,7 @@ export const CommentProvider: FC<{
   return (
     <CommentReaderMapContext.Provider value={readers}>
       <CommentListContext.Provider value={commentAtom}>
-        {children(data, commentAtom)}
+        {children(data as CommentThreadInfiniteData, commentAtom)}
 
         {hasNextPage && (
           <LoadMoreIndicator onLoading={fetchNextPage}>
@@ -146,7 +139,7 @@ export const useCommentById = (commentId: string) => {
 export const useUpdateComment = () => {
   const commentsAtom = use(CommentListContext)
   return useCallback(
-    (comment: Partial<CommentModel> & { id: string }) => {
+    (comment: Partial<CommentThreadViewItem> & { id: string }) => {
       jotaiStore.set(commentsAtom, (prev) => {
         const newComments = {
           ...prev,
@@ -157,7 +150,7 @@ export const useUpdateComment = () => {
           },
         }
 
-        return newComments
+        return newComments as Record<string, CommentThreadViewItem>
       })
     },
     [commentsAtom],

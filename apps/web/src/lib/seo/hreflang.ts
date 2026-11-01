@@ -29,6 +29,28 @@ export const buildLanguageAlternates = (
   )
 }
 
+/**
+ * 从 v14 响应 meta 的 `translation` 字段中提取文章级翻译元数据（用于 hreflang）。
+ * 详情接口形态为 `Record<entryId, EntryTranslation>`；若后端直接返回单个
+ * `EntryTranslation`（列表场景），则直接读取其 `article`。
+ */
+export const extractArticleTranslationMeta = (
+  translation: unknown,
+  entryId: string,
+):
+  | { sourceLang?: string | null; availableTranslations?: string[] }
+  | undefined => {
+  if (!translation || typeof translation !== 'object') return undefined
+  const record = translation as Record<
+    string,
+    {
+      article?: { sourceLang?: string | null; availableTranslations?: string[] }
+    }
+  >
+  const entry = record[entryId] ?? ('article' in record ? record : undefined)
+  return entry?.article
+}
+
 export const getSupportedLocalesFromTranslations = (input?: {
   sourceLang?: string | null
   availableTranslations?: string[] | null

@@ -3,6 +3,7 @@ import { simpleCamelcaseKeys } from '@mx-space/api-client'
 import RSS from 'rss'
 
 import { apiClient } from '~/lib/request'
+import { unwrapV3Envelope } from '~/lib/request.shared'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 86400 // 1 day
@@ -13,10 +14,13 @@ export async function GET() {
       next: {
         revalidate: 86400,
       },
-    }).then(
-      async (res) =>
-        simpleCamelcaseKeys(await res.json()) as Promise<AggregateRoot>,
-    ),
+    }).then(async (res) => {
+      const json = await res.json()
+      // v14 后端统一 { data, meta? } 信封，需解包
+      return simpleCamelcaseKeys(
+        unwrapV3Envelope(json),
+      ) as Promise<AggregateRoot>
+    }),
     apiClient.say.getAllPaginated(1, 20),
   ])
 
@@ -40,7 +44,7 @@ export async function GET() {
       url: `${agg.url.webUrl}/says`,
       author: `${say.source || say.author}`,
       guid: say.id,
-      date: say.created,
+      date: say.createdAt,
     })
   }
 

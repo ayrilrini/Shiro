@@ -1,10 +1,6 @@
 import './page.css'
 
-import type {
-  ModelWithLiked,
-  ModelWithTranslation,
-  NoteModel,
-} from '@mx-space/api-client'
+import type { NoteModel } from '@mx-space/api-client'
 import type { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
 
@@ -37,6 +33,7 @@ import { definePrerenderPage } from '~/lib/request.server'
 import {
   buildLanguageAlternates,
   buildLocalePrefixedPath,
+  extractArticleTranslationMeta,
   getSupportedLocalesFromTranslations,
 } from '~/lib/seo/hreflang'
 import {
@@ -63,7 +60,7 @@ import {
 } from './pageExtra'
 import { Transition } from './Transition'
 
-type NoteWithTranslation = ModelWithLiked<ModelWithTranslation<NoteModel>>
+type NoteWithTranslation = NoteModel
 
 export const dynamic = 'force-dynamic'
 
@@ -145,13 +142,13 @@ export const generateMetadata = async (props: {
     ? searchParams.password[0]
     : searchParams.password
   try {
-    const { note: res } = await getData({
+    const { note: res, translation } = await getData({
       ...params,
       password,
       lang: searchParams.lang,
     })
 
-    const { data } = res
+    const data = res
     const description = getSummaryFromMd(data.text ?? '')
 
     const ogUrl = await getOgUrl(
@@ -167,10 +164,9 @@ export const generateMetadata = async (props: {
       params.locale as any,
       canonicalPathNoLocale,
     )
-    const supportedLocales = getSupportedLocalesFromTranslations({
-      sourceLang: (data as any).translationMeta?.sourceLang,
-      availableTranslations: (data as any).availableTranslations,
-    })
+    const supportedLocales = getSupportedLocalesFromTranslations(
+      extractArticleTranslationMeta(translation, data.id),
+    )
 
     return {
       title: data.title,
@@ -227,8 +223,8 @@ export default definePrerenderPage<NoteDetailPageParams>()<NoteDataResult>({
 
     return (
       <TocHeadingStrategyProvider
-        contentFormat={data.data.contentFormat}
-        hasContent={!!data.data.content}
+        contentFormat={data.contentFormat}
+        hasContent={!!data.content}
       >
         <CurrentNoteNidProvider nid={nid} />
         <CurrentNoteDataProvider data={data} />
@@ -237,15 +233,12 @@ export default definePrerenderPage<NoteDetailPageParams>()<NoteDataResult>({
         <Transition className="min-w-0" lcpOptimization>
           <Paper key={nid} as={NoteMainContainer}>
             <PageInner
-              data={data.data}
+              data={data}
               privateLoginOnlyMessage={t('private_login_only')}
             />
           </Paper>
           <BottomToUpSoftScaleTransitionView delay={500}>
-            <CommentAreaRootLazy
-              refId={data.data.id}
-              allowComment={data.data.allowComment}
-            />
+            <CommentAreaRootLazy refId={data.id} allowComment />
           </BottomToUpSoftScaleTransitionView>
         </Transition>
 

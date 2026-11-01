@@ -14,12 +14,10 @@ export const adminUrlAtom = atom<string | null>(null)
 export const webUrlAtom = atom<string | null>(null)
 
 export const fetchAppUrl = async () => {
-  const { data } = await queryClient.fetchQuery({
+  const data = await queryClient.fetchQuery({
     queryKey: ['app.url'],
-    queryFn: () =>
-      apiClient.proxy.options.url.get<{
-        data: UrlConfig
-      }>(),
+    // v5 信封已解包，直接返回 UrlConfig
+    queryFn: () => apiClient.proxy.options.url.get<UrlConfig>(),
   })
 
   if (data.adminUrl) jotaiStore.set(adminUrlAtom, data.adminUrl)

@@ -118,10 +118,11 @@ const List = () => {
   const { data, isLoading, fetchNextPage } = useInfiniteQuery({
     queryKey: QUERY_KEY,
     queryFn: async ({ pageParam }) => {
-      const { data } = await apiClient.shorthand.getList({
+      const res = await apiClient.shorthand.getList({
         before: pageParam,
         size: FETCH_SIZE,
       })
+      const data = res.$serialized
 
       if (data.length < FETCH_SIZE) {
         setHasNext(false)

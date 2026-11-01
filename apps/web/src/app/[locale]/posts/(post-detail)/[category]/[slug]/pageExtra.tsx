@@ -21,7 +21,6 @@ import {
   useSetCurrentPostData,
 } from '~/providers/post/CurrentPostDataProvider'
 import { useAggregationSelector } from '~/providers/root/aggregation-data-provider'
-import type { PostWithTranslation } from '~/queries/definition'
 import { queries } from '~/queries/definition'
 
 export const LdJsonWithAuthor = ({
@@ -61,7 +60,8 @@ export const PostTitle = () => {
 export const MarkdownSelection: Component = (props) => {
   const id = useCurrentPostDataSelector((data) => data?.id)!
   const title = useCurrentPostDataSelector((data) => data?.title)!
-  const allowComment = useCurrentPostDataSelector((data) => data?.allowComment)!
+  // v14 不再下发每篇 allowComment，默认开放
+  const allowComment = true
   return (
     <WithArticleSelectionAction
       refId={id}
@@ -92,18 +92,17 @@ export const PostMetaBarInternal: Component = ({ className }) => {
   const meta = useCurrentPostDataSelector((data) => {
     if (!data) return
     return {
-      created: data.created,
+      createdAt: data.createdAt,
       category: data.category,
       tags: data.tags,
-      count: data.count,
-      modified: data.modified,
+      readCount: data.readCount,
+      likeCount: data.likeCount,
+      modifiedAt: data.modifiedAt,
     }
   })
 
   if (!meta) return null
-  return (
-    <PostMetaBar meta={meta} className={className} />
-  )
+  return <PostMetaBar meta={meta} className={className} />
 }
 
 export const PostDataReValidate: FC<{
@@ -138,7 +137,7 @@ export const PostDataReValidate: FC<{
     queryClient
       .fetchQuery(queries.post.bySlug(category.slug, slug, locale))
       .then((data) => {
-        dataSetter(data as PostWithTranslation)
+        dataSetter(data.post)
         // toast.info('此文章访问的内容已过期，所以页面数据自动更新了。')
         logger.log('Post data revalidated', data)
       })

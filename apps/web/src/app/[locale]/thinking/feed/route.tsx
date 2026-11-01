@@ -3,6 +3,7 @@ import { simpleCamelcaseKeys } from '@mx-space/api-client'
 import RSS from 'rss'
 
 import { apiClient } from '~/lib/request'
+import { unwrapV3Envelope } from '~/lib/request.shared'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 86400 // 1 day
@@ -13,10 +14,13 @@ export async function GET() {
       next: {
         revalidate: 86400,
       },
-    }).then(
-      async (res) =>
-        simpleCamelcaseKeys(await res.json()) as Promise<AggregateRoot>,
-    ),
+    }).then(async (res) => {
+      const json = await res.json()
+      // v14 后端统一 { data, meta? } 信封，需解包
+      return simpleCamelcaseKeys(
+        unwrapV3Envelope(json),
+      ) as Promise<AggregateRoot>
+    }),
     apiClient.recently.getList({
       size: 20,
     }),
@@ -35,9 +39,9 @@ export async function GET() {
     pubDate: now.toUTCString(),
   })
 
-  for (const t of thinking.data) {
+  for (const t of thinking.$serialized) {
     feed.item({
-      title: new Date(t.created).toLocaleDateString(),
+      title: new Date(t.createdAt).toLocaleDateString(),
       description:
         `${t.content}\n\n${t.ref?.title ? `引用：${t.ref.title}` : ''}\n\n` +
         ` <p style='text-align: right'>
@@ -45,7 +49,7 @@ export async function GET() {
       </p>`,
       url: `${agg.url.webUrl}/thinking`,
       guid: t.id,
-      date: t.created,
+      date: t.createdAt,
     })
   }
 

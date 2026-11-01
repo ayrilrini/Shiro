@@ -28,14 +28,13 @@ const animateUl: TargetAndTransition = {
 const NoteTimelineImpl = () => {
   const locale = useLocale()
   const note = useCurrentNoteDataSelector((data) => {
-    const note = data?.data
-    if (!note) return null
+    if (!data) return null
     return {
-      id: note.id,
-      nid: note.nid,
-      title: note.title,
-      created: note.created,
-      isPublished: note.isPublished,
+      id: data.id,
+      nid: data.nid,
+      title: data.title,
+      created: data.createdAt,
+      isPublished: data.isPublished,
     }
   })
   const noteNid = useCurrentNoteNid()

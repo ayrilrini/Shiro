@@ -23,9 +23,9 @@ export function useCommentsQuery(refId: string) {
     },
     getNextPageParam: (lastPage) =>
       lastPage.pagination.hasNextPage
-        ? lastPage.pagination.currentPage + 1
+        ? lastPage.pagination.page + 1
         : undefined,
-    getPreviousPageParam: (firstPage) => firstPage.pagination.currentPage - 1,
+    getPreviousPageParam: (firstPage) => firstPage.pagination.page - 1,
     initialPageParam: 1 as number | undefined,
   })
 

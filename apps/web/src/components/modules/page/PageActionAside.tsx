@@ -14,12 +14,12 @@ export const PageActionAside: Component = ({ className }) => (
 )
 
 const PageAsideCommentButton = () => {
-  const { title, id, allowComment } =
+  const { title, id } =
     useCurrentPageDataSelector((data) => ({
       title: data?.title,
       id: data?.id,
-      allowComment: data?.allowComment,
     })) || {}
-  if (!id || !allowComment) return null
+  // v14 页面模型不再含 allowComment，默认开放
+  if (!id) return null
   return <AsideCommentButton refId={id} title={title!} />
 }

@@ -136,7 +136,7 @@ export const GET = async (
             title: r.title,
             subtitle: r.category.name,
             meta: r.meta,
-            images: r.images,
+            images: r.images ?? undefined,
             id: r.id,
           }))
         break
@@ -147,11 +147,11 @@ export const GET = async (
         document = await apiClient.note
           .getNoteByNid(+nid, { lang: locale })
           .then((r) => ({
-            title: r.data.title,
+            title: r.title,
             subtitle: messages.nav_notes,
-            meta: r.data.meta,
-            images: r.data.images,
-            id: r.data.id,
+            meta: r.meta,
+            images: r.images ?? undefined,
+            id: r.id,
           }))
         break
       }
@@ -161,7 +161,7 @@ export const GET = async (
           title: data.title,
           subtitle: data.subtitle || '',
           meta: data.meta,
-          images: data.images,
+          images: data.images ?? undefined,
           id: data.id,
         }))
         break

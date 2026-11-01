@@ -1,9 +1,6 @@
 'use client'
 
-import type {
-  Image,
-  NoteWrappedWithLikedAndTranslationPayload,
-} from '@mx-space/api-client'
+import type { Image } from '@mx-space/api-client'
 import { useQueryClient } from '@tanstack/react-query'
 import { clsx } from 'clsx'
 import { useFormatter, useLocale, useTranslations } from 'next-intl'
@@ -26,11 +23,10 @@ import {
 import { queries } from '~/queries/definition'
 
 export const MarkdownSelection: Component = (props) => {
-  const id = useCurrentNoteDataSelector((data) => data?.data?.id)!
-  const title = useCurrentNoteDataSelector((data) => data?.data?.title)!
-  const canComment = useCurrentNoteDataSelector(
-    (data) => data?.data.allowComment,
-  )!
+  const id = useCurrentNoteDataSelector((data) => data?.id)!
+  const title = useCurrentNoteDataSelector((data) => data?.title)!
+  // v14 后端不再下发每篇 allowComment，评论区默认开放
+  const canComment = true
   return (
     <WithArticleSelectionAction
       refId={id}
@@ -43,8 +39,8 @@ export const MarkdownSelection: Component = (props) => {
 }
 
 export const NoteTitle = () => {
-  const title = useCurrentNoteDataSelector((data) => data?.data.title)
-  const id = useCurrentNoteDataSelector((data) => data?.data.id)
+  const title = useCurrentNoteDataSelector((data) => data?.title)
+  const id = useCurrentNoteDataSelector((data) => data?.id)
 
   if (!title) return null
   return (
@@ -63,7 +59,7 @@ export const NoteTitle = () => {
 }
 
 export const NoteDateMeta = () => {
-  const created = useCurrentNoteDataSelector((data) => data?.data.created)
+  const created = useCurrentNoteDataSelector((data) => data?.createdAt)
   const format = useFormatter()
 
   if (!created) return null
@@ -83,8 +79,8 @@ export const NoteDateMeta = () => {
 }
 export const NoteHeaderDate = withClientOnly(() => {
   const date = useCurrentNoteDataSelector((data) => ({
-    created: data?.data.created,
-    modified: data?.data.modified,
+    created: data?.createdAt,
+    modified: data?.modifiedAt,
   }))
   const format = useFormatter()
   const t = useTranslations('common')
@@ -119,7 +115,7 @@ export const NoteHeaderDate = withClientOnly(() => {
 
 export const NoteMarkdownImageRecordProvider = (props: PropsWithChildren) => {
   const images = useCurrentNoteDataSelector(
-    (data) => data?.data.images || (noopArr as Image[]),
+    (data) => data?.images || (noopArr as Image[]),
   )!
 
   return (
@@ -150,7 +146,7 @@ export const NoteDataReValidate: FC<{ fetchedAt: string }> = withClientOnly(
 
     const nid = useCurrentNoteDataSelector((note) => {
       if (!note) return {}
-      return note.data.nid
+      return note.nid
     })
     const onceRef = useRef(false)
     const queryClient = useQueryClient()
@@ -164,7 +160,7 @@ export const NoteDataReValidate: FC<{ fetchedAt: string }> = withClientOnly(
       queryClient
         .fetchQuery(queries.note.byNid(nid.toString(), null, locale))
         .then((data) => {
-          dataSetter(data as NoteWrappedWithLikedAndTranslationPayload)
+          dataSetter(data.note)
           // toast.info('此文章访问的内容已过期，所以页面数据自动更新了。')
           logger.log('Note data revalidated', data)
         })

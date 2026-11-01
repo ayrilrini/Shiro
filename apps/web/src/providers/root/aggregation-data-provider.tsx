@@ -10,10 +10,13 @@ import { setWebUrl } from '~/atoms'
 import { useBeforeMounted } from '~/hooks/common/use-before-mounted'
 import { isDev } from '~/lib/env'
 import { jotaiStore } from '~/lib/store'
+import type { PageMetaItem } from '~/queries/definition/aggregation'
 
 export type { AggregateRoot }
 
-export const aggregationDataAtom = atom<null | AggregateRoot>(null)
+export const aggregationDataAtom = atom<
+  null | (AggregateRoot & { pageMeta?: PageMetaItem[] })
+>(null)
 const appConfigAtom = atom<AppConfig | null>(null)
 
 export const AggregationProvider: FC<
@@ -64,7 +67,7 @@ export const AggregationProvider: FC<
 }
 
 export const useAggregationSelector = <T,>(
-  selector: (atomValue: AggregateRoot) => T,
+  selector: (atomValue: AggregateRoot & { pageMeta?: PageMetaItem[] }) => T,
   deps: any[] = [],
 ): T | null =>
   useAtomValue(

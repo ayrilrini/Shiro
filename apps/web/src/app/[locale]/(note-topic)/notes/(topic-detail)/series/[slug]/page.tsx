@@ -1,6 +1,6 @@
 'use client'
 
-import type { NoteTopicListItem, PaginateResult } from '@mx-space/api-client'
+import type { NoteModel, PaginateResult } from '@mx-space/api-client'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { useParams } from 'next/navigation'
 import { useLocale, useTranslations } from 'next-intl'
@@ -41,7 +41,7 @@ export default function Page() {
       if (!topicId) throw new Error('topicId is not ready :(')
       return await apiClient.note.proxy
         .topics(topicId)
-        .get<PaginateResult<NoteTopicListItem>>({
+        .get<PaginateResult<NoteModel>>({
           params: {
             page: pageParam,
             lang,
@@ -52,7 +52,7 @@ export default function Page() {
 
     getNextPageParam: (lastPage) =>
       lastPage.pagination.hasNextPage
-        ? lastPage.pagination.currentPage + 1
+        ? lastPage.pagination.page + 1
         : undefined,
   })
   if (!data) throw new Error('topic data is lost :(')
@@ -69,7 +69,7 @@ export default function Page() {
         <TimelineList>
           {notes?.pages.map((page) =>
             page.data.map((child, i) => {
-              const date = new Date(child.created)
+              const date = new Date(child.createdAt)
 
               return (
                 <BottomToUpTransitionView

@@ -21,7 +21,8 @@
     "prod:pm2": "cross-env NODE_ENV=production pm2 restart ecosystem.config.cjs",
     "prod:reload": "pm2 reload ecosystem.config.cjs",
     "prod:stop": "pm2 stop ecosystem.config.cjs",
-    "start": "npm run dev"
+    "start": "npm run dev",
+    "test": "vitest run"
   },
   "dependencies": {
     "@base-ui/react": "1.3.0",
@@ -36,7 +37,7 @@
     "@lexical/markdown": "^0.41.0",
     "@lexical/react": "^0.41.0",
     "@lexical/rich-text": "^0.41.0",
-    "@mx-space/api-client": "2.3.0",
+    "@mx-space/api-client": "5.13.0",
     "@radix-ui/react-avatar": "1.1.11",
     "@radix-ui/react-checkbox": "^1.3.3",
     "@radix-ui/react-dialog": "1.1.15",
@@ -105,10 +106,10 @@
     "rss": "1.2.2",
     "schema-dts": "1.1.5",
     "server-only": "^0.0.1",
-    "socket.io-client": "4.8.3",
     "sonner": "2.0.7",
     "tailwind-merge": "3.4.0",
     "tailwind-variants": "3.2.2",
+    "thumbhash": "^0.1.1",
     "unified": "^11.0.5",
     "uniqolor": "1.1.1",
     "unist-util-visit": "5.1.0",

@@ -69,16 +69,15 @@ const SubscribeButton = () => {
 }
 
 const PostAsideCommentButton = () => {
-  const { title, id, allowComment } =
+  const { title, id } =
     useCurrentPostDataSelector((data) => ({
       title: data?.title,
       id: data?.id,
-      allowComment: data?.allowComment,
     })) || {}
   const isEof = useIsEoFWrappedElement()
   if (!id) return null
   if (isEof) return null
-  if (!allowComment) return null
+  // v14 不再下发每篇 allowComment，默认开放
 
   return <AsideCommentButton refId={id} title={title!} />
 }
@@ -89,7 +88,7 @@ const LikeButton = () => {
   const [update] = useForceUpdate()
 
   const id = useCurrentPostDataSelector((data) => data?.id)
-  const likeCount = useCurrentPostDataSelector((data) => data?.count.like)
+  const likeCount = useCurrentPostDataSelector((data) => data?.likeCount)
 
   if (!id) return null
   const handleLike = () => {
@@ -98,7 +97,7 @@ const LikeButton = () => {
     apiClient.activity.likeIt('Post', id).then(() => {
       setLikeId(id)
       setGlobalCurrentPostData((draft) => {
-        draft.count.like += 1
+        draft.likeCount += 1
       })
       update()
     })

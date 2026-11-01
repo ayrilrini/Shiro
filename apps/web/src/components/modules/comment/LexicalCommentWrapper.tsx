@@ -1,10 +1,6 @@
 'use client'
 
-import type {
-  CommentModel,
-  CommentThreadItem,
-  PaginateResult,
-} from '@mx-space/api-client'
+import type { PaginateResult } from '@mx-space/api-client'
 import type { InfiniteData } from '@tanstack/react-query'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import type { PropsWithChildren } from 'react'
@@ -18,13 +14,10 @@ import { extractBlockInfos } from './anchor-utils'
 import { CommentAnchorHighlight } from './CommentAnchorHighlight'
 import { CommentBlockGutter } from './CommentBlockGutter'
 import { RichContentElementProvider } from './RichContentElementContext'
+import type { CommentThreadPage, CommentWithAnchor } from './thread'
 import { flattenThreadComments } from './thread'
-import type { CommentAnchor } from './types'
 
-type CommentWithAnchor = CommentModel & { anchor?: CommentAnchor }
-type CommentsQueryData = InfiniteData<
-  PaginateResult<CommentThreadItem & { anchor?: CommentAnchor; ref: string }>
->
+type CommentsQueryData = InfiniteData<CommentThreadPage>
 
 function useAnchorCommentsQuery(refId: string): CommentWithAnchor[] {
   const { data } = useQuery({
@@ -32,11 +25,7 @@ function useAnchorCommentsQuery(refId: string): CommentWithAnchor[] {
     queryFn: async () => {
       const data = await apiClient.comment.proxy
         .ref(refId)
-        .get<
-          PaginateResult<
-            CommentThreadItem & { anchor?: CommentAnchor; ref: string }
-          >
-        >({
+        .get<PaginateResult<CommentThreadPage['data'][number]>>({
           params: { hasAnchor: 'true', size: 50 },
         })
 

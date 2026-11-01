@@ -1,15 +1,11 @@
 'use client'
 
-import type {
-  ModelWithLiked,
-  ModelWithTranslation,
-  PostModel,
-} from '@mx-space/api-client'
+import type { PostModel } from '@mx-space/api-client'
 import { createModelDataProvider } from 'jojoo/react'
 
 import { isClientSide, isDev } from '~/lib/env'
 
-type PostWithTranslation = ModelWithLiked<ModelWithTranslation<PostModel>>
+type PostWithTranslation = PostModel
 
 const {
   ModelDataProvider,

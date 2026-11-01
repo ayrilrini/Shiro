@@ -36,19 +36,14 @@ export const PostPreview: FC<PostPreviewProps> = (props) => {
   const overrideAtom = useMemo(() => atom(null! as PostWithTranslation), [])
   if (isLoading) return <Loading className="w-full" useDefaultLoadingText />
   if (!data) return null
-  const postData = data as PostWithTranslation
+  const postData = data.post
   return (
     <CurrentPostDataAtomProvider overrideAtom={overrideAtom}>
       <CurrentPostDataProvider data={postData} />
       {!!postData.id && <AckRead id={postData.id} type="post" />}
       <BottomToUpSmoothTransitionView>
         <Paper>
-          <article
-            className={clsx(
-              'relative w-full min-w-0',
-             'prose',
-            )}
-          >
+          <article className={clsx('relative w-full min-w-0', 'prose')}>
             <header className="mb-8">
               <h1 className="mt-8 text-balance text-center">
                 {postData.title}

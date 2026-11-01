@@ -27,6 +27,7 @@ import { definePrerenderPage } from '~/lib/request.server'
 import {
   buildLanguageAlternates,
   buildLocalePrefixedPath,
+  extractArticleTranslationMeta,
   getSupportedLocalesFromTranslations,
 } from '~/lib/seo/hreflang'
 import { CurrentPostDataProvider } from '~/providers/post/CurrentPostDataProvider'
@@ -59,7 +60,7 @@ export const generateMetadata = async (props: {
   const params = await props.params
   const searchParams = await props.searchParams
   try {
-    const { post: data } = await getData({
+    const { post: data, translation } = await getData({
       ...params,
       lang: searchParams.lang,
     })
@@ -83,10 +84,9 @@ export const generateMetadata = async (props: {
       params.locale as any,
       canonicalPathNoLocale,
     )
-    const supportedLocales = getSupportedLocalesFromTranslations({
-      sourceLang: data.translationMeta?.sourceLang,
-      availableTranslations: (data as any).availableTranslations,
-    })
+    const supportedLocales = getSupportedLocalesFromTranslations(
+      extractArticleTranslationMeta(translation, data.id),
+    )
 
     return {
       title: data.title,
@@ -188,8 +188,8 @@ export default definePrerenderPage<PageParams>()<PostDataResult>({
       headline: data.title,
       image: data.meta?.cover ? [data.meta.cover] : undefined,
       description: data.summary || (data.text ?? '').slice(0, 200),
-      datePublished: data.created,
-      dateModified: data.modified || undefined,
+      datePublished: data.createdAt,
+      dateModified: data.modifiedAt || undefined,
     }
 
     return (
@@ -210,10 +210,7 @@ export default definePrerenderPage<PageParams>()<PostDataResult>({
             <PostPage data={data} />
 
             <BottomToUpSoftScaleTransitionView delay={500}>
-              <CommentAreaRootLazy
-                refId={data.id}
-                allowComment={data.allowComment}
-              />
+              <CommentAreaRootLazy refId={data.id} allowComment />
             </BottomToUpSoftScaleTransitionView>
           </BottomToUpTransitionView>
 

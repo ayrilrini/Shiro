@@ -1,10 +1,8 @@
 'use client'
 
 import type {
-  ModelWithLiked,
-  ModelWithTranslation,
   NoteModel,
-  NoteWrappedWithLikedAndTranslationPayload,
+  NoteWrappedPayload,
   PageModel,
   PostModel,
 } from '@mx-space/api-client'
@@ -59,7 +57,7 @@ import {
 } from '../posts/(post-detail)/[category]/[slug]/pageExtra'
 import { PostMarkdown } from '../posts/(post-detail)/[category]/[slug]/PostMarkdown'
 
-type PostWithTranslation = ModelWithLiked<ModelWithTranslation<PostModel>>
+type PostWithTranslation = PostModel
 
 const safeParse = (value: string) => {
   try {
@@ -188,27 +186,14 @@ export default function PreviewPage() {
 
 const PostPreview = () => {
   const rawData = useAtomValue(previewDataAtom) as PostModel
-  const data = useMemo(
-    () =>
-      ({
-        ...rawData,
-        isTranslated: false,
-        liked: false,
-      }) as PostWithTranslation,
-    [rawData],
-  )
+  const data = useMemo(() => ({ ...rawData }) as PostWithTranslation, [rawData])
   const overrideAtom = useMemo(() => atom(null! as PostWithTranslation), [])
   return (
     <div className="container m-auto mt-[120px] max-w-7xl px-2 md:px-6 lg:p-0">
       <CurrentPostDataAtomProvider overrideAtom={overrideAtom}>
         <CurrentPostDataProvider data={data} />
         <div className="relative flex min-h-[120px] grid-cols-[auto_200px] lg:grid">
-          <article
-            className={clsx(
-              'relative w-full min-w-0',
-               'prose',
-            )}
-          >
+          <article className={clsx('relative w-full min-w-0', 'prose')}>
             <header className="mb-8">
               <h1 className="text-balance text-center">{data.title}</h1>
 
@@ -237,27 +222,18 @@ const PostPreview = () => {
 const NotePreview = () => {
   const rawData = useAtomValue(previewDataAtom) as NoteModel
 
-  const overrideAtom = useMemo(
-    () => atom(null! as NoteWrappedWithLikedAndTranslationPayload),
-    [],
-  )
+  const overrideAtom = useMemo(() => atom(null! as NoteWrappedPayload), [])
   const data = useMemo(
     () =>
       ({
         prev: undefined,
         next: undefined,
-        data: {
-          ...rawData,
-          created: new Date().toISOString(),
-          images: rawData.images ?? [],
-          count: rawData.count ?? {
-            read: 0,
-            like: 0,
-          },
-          isTranslated: false,
-          liked: false,
-        },
-      }) as NoteWrappedWithLikedAndTranslationPayload,
+        ...rawData,
+        createdAt: rawData.createdAt ?? new Date().toISOString(),
+        images: rawData.images ?? [],
+        readCount: rawData.readCount ?? 0,
+        likeCount: rawData.likeCount ?? 0,
+      }) as NoteWrappedPayload,
     [rawData],
   )
   return (
@@ -266,7 +242,7 @@ const NotePreview = () => {
         <CurrentNoteDataProvider data={data} />
         <Paper>
           <NoteHeadCover image={rawData.meta?.cover} />
-          <IndentArticleContainer prose={data.data.contentFormat !== 'lexical'}>
+          <IndentArticleContainer prose={data.contentFormat !== 'lexical'}>
             <header>
               <NoteTitle />
               <span className="flex flex-wrap items-center text-sm text-neutral/60">
@@ -304,9 +280,7 @@ const PagePreview = () => {
       <CurrentPageDataAtomProvider overrideAtom={overrideAtom}>
         <CurrentPageDataProvider data={data} />
         <div className="relative w-full min-w-0">
-          <article
-            className={'prose'}
-          >
+          <article className={'prose'}>
             <header className="mb-8">
               <PageTitle />
 

@@ -2,7 +2,7 @@
 
 import 'jotai'
 
-import type { PostListItem } from '@mx-space/api-client'
+import type { PostModel } from '@mx-space/api-client'
 import type { FC } from 'react'
 import { useEffect, useRef } from 'react'
 
@@ -19,7 +19,7 @@ declare global {
 }
 
 export const PostItemComposer: FC<{
-  data: PostListItem
+  data: PostModel
   index: number
 }> = ({ data, index }) => {
   const renderedViewMode = usePostViewMode()

@@ -1,13 +1,10 @@
-import type {
-  ModelWithLiked,
-  ModelWithTranslation,
-  PostModel,
-} from '@mx-space/api-client'
+import type { PostModel } from '@mx-space/api-client'
 
 import { attachServerFetch } from '~/lib/attach-fetch'
 import { getQueryClient } from '~/lib/query-client.server'
 import { requestErrorHandler } from '~/lib/request.server'
 import { queries } from '~/queries/definition'
+import type { PostDetailQueryResult } from '~/queries/definition/post'
 
 export interface PageParams extends LocaleParams {
   category: string
@@ -15,12 +12,11 @@ export interface PageParams extends LocaleParams {
   lang?: string
 }
 
-export type PostWithTranslation = ModelWithLiked<
-  ModelWithTranslation<PostModel>
->
+export type PostWithTranslation = PostModel
 
 export interface PostDataResult {
   post: PostWithTranslation
+  translation?: PostDetailQueryResult['translation']
 }
 
 const getPostData = async (
@@ -32,7 +28,7 @@ const getPostData = async (
   const data = await getQueryClient()
     .fetchQuery(queries.post.bySlug(category, slug, lang))
     .catch(requestErrorHandler)
-  return data as PostWithTranslation
+  return data as PostDetailQueryResult
 }
 
 export const getData = async (params: PageParams): Promise<PostDataResult> => {

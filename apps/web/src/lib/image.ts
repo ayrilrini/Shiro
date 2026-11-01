@@ -1,4 +1,5 @@
 import { encode } from 'blurhash'
+import { thumbHashToDataURL } from 'thumbhash'
 
 import { TENCENT_CDN_DOMAIN } from '~/app.static.config'
 
@@ -117,6 +118,25 @@ export const encodeImageToBlurhashWebgl = (image: HTMLImageElement): string => {
 
   // Encode the resized image to BlurHash
   return encode(resizedImageData.data, 32, 32, 4, 4)
+}
+
+/**
+ * 将后端下发的 base64 编码 ThumbHash 解码为可直用的 data URL。
+ * 兼容浏览器（atob）与 Node SSR（Buffer）环境，失败时返回 undefined。
+ */
+export const thumbhashBase64ToDataUrl = (
+  base64: string,
+): string | undefined => {
+  try {
+    const binary =
+      typeof atob === 'function'
+        ? atob(base64)
+        : Buffer.from(base64, 'base64').toString('binary')
+    const u8 = Uint8Array.from(binary, (c) => c.charCodeAt(0))
+    return thumbHashToDataURL(u8)
+  } catch {
+    return undefined
+  }
 }
 
 export const addImageUrlResizeQuery = (url: string, size: number) => {

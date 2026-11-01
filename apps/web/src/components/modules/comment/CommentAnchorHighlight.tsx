@@ -1,6 +1,5 @@
 'use client'
 
-import type { CommentModel } from '@mx-space/api-client'
 import { AnimatePresence } from 'motion/react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
@@ -8,9 +7,8 @@ import { resolveRangeAnchor } from './anchor-resolve'
 import type { BlockInfo } from './anchor-utils'
 import { CommentAnchorPopover } from './CommentAnchorPopover'
 import { useRichContentElement } from './RichContentElementContext'
-import type { CommentAnchor, RangeAnchor } from './types'
-
-type CommentWithAnchor = CommentModel & { anchor?: CommentAnchor }
+import type { CommentWithAnchor } from './thread'
+import type { RangeAnchor } from './types'
 
 function anchorKey(anchor: RangeAnchor): string {
   return `${anchor.blockId}:${anchor.startOffset}:${anchor.endOffset}`
@@ -19,7 +17,8 @@ function anchorKey(anchor: RangeAnchor): string {
 function collectRangeAnchors(comments: CommentWithAnchor[]): RangeAnchor[] {
   const result: RangeAnchor[] = []
   for (const c of comments) {
-    if (c.anchor?.mode === 'range') result.push(c.anchor)
+    if (c.anchor?.mode === 'range')
+      result.push(c.anchor as unknown as RangeAnchor)
   }
   return result
 }
@@ -32,7 +31,7 @@ function groupCommentsByRangeAnchor(
     { anchor: RangeAnchor; comments: CommentWithAnchor[] }
   >()
   for (const c of comments) {
-    const { anchor } = c
+    const anchor = c.anchor as unknown as RangeAnchor | null | undefined
     if (anchor?.mode !== 'range') continue
     const key = anchorKey(anchor)
     const existing = map.get(key)

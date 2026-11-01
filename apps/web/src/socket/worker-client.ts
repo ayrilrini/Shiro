@@ -171,12 +171,14 @@ class SocketWorker {
 
   prepare(worker: SocketWorkerTransport, lang?: string) {
     const gatewayUrlWithoutTrailingSlash = GATEWAY_URL.replace(/\/$/, '')
+    // v14 实时通道为原生 WebSocket：端点 /ws/web，协议 ws(s)://
+    const wsGatewayUrl = gatewayUrlWithoutTrailingSlash.replace(/^http/, 'ws')
     this.bindMessageHandler(worker)
     worker.postMessage({
       type: 'config',
 
       payload: {
-        url: `${gatewayUrlWithoutTrailingSlash}/web`,
+        url: `${wsGatewayUrl}/ws/web`,
         socket_session_id: getSocketWebSessionId(),
         lang,
       },

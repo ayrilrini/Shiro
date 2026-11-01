@@ -2,28 +2,31 @@ import type {
   CollectionRefTypes,
   CommentModel,
   CommentThreadItem,
-  PaginateResult,
 } from '@mx-space/api-client'
-import type { InfiniteData } from '@tanstack/react-query'
 import { describe, expect, it } from 'vitest'
 
-import { buildCommentTreeItem, mergeThreadRepliesIntoPages } from './thread'
+import {
+  buildCommentTreeItem,
+  type CommentThreadPage,
+  mergeThreadRepliesIntoPages,
+} from './thread'
 
 const makeComment = (
   id: string,
-  created: string,
+  createdAt: string,
   overrides: Partial<CommentModel> = {},
-): CommentModel => ({
-  id,
-  created,
-  refType: 'posts' as CollectionRefTypes,
-  ref: 'post-id',
-  state: 1,
-  author: `author-${id}`,
-  text: `text-${id}`,
-  avatar: '',
-  ...overrides,
-})
+): CommentModel =>
+  ({
+    id,
+    createdAt,
+    refType: 'posts' as CollectionRefTypes,
+    refId: 'post-id',
+    state: 1,
+    author: `author-${id}`,
+    text: `text-${id}`,
+    avatar: '',
+    ...overrides,
+  }) as CommentModel
 
 describe('comment thread helpers', () => {
   it('rebuilds nested children from flat replies using parentCommentId', () => {
@@ -67,7 +70,7 @@ describe('comment thread helpers', () => {
   })
 
   it('merges loaded middle replies back into paginated thread data', () => {
-    const root: CommentThreadItem & { ref: string } = {
+    const root = {
       ...makeComment('root', '2026-03-14T10:00:00.000Z', {
         parentCommentId: null,
         rootCommentId: null,
@@ -91,7 +94,7 @@ describe('comment thread helpers', () => {
         hiddenCount: 1,
         nextCursor: 'cursor-1',
       },
-    }
+    } satisfies CommentThreadPage['data'][number]
 
     const data = {
       pageParams: [1],
@@ -99,8 +102,8 @@ describe('comment thread helpers', () => {
         {
           data: [root],
           pagination: {
-            currentPage: 1,
-            totalPage: 1,
+            page: 1,
+            totalPages: 1,
             hasPrevPage: false,
             hasNextPage: false,
             size: 10,
@@ -108,9 +111,7 @@ describe('comment thread helpers', () => {
           },
         },
       ],
-    } satisfies InfiniteData<
-      PaginateResult<CommentThreadItem & { ref: string }>
-    >
+    } satisfies { pageParams: number[]; pages: CommentThreadPage[] }
 
     const next = mergeThreadRepliesIntoPages(data, {
       rootCommentId: 'root',

@@ -22,6 +22,11 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
+*.log
+apps/web/*.html
+
+# local diagnostics leftover (junction, safe to remove: rmdir .junction_test)
+.junction_test/
 
 # local env files
 .env*.local
