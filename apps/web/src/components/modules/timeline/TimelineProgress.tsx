@@ -45,8 +45,13 @@ export const TimelineProgress = () => {
   }, [])
   return (
     <>
+      {/* currentYear/currentDay 的初始值依赖运行环境时区，SSR（服务器时区）与
+          客户端（本地时区）跨午夜时会不同，suppressHydrationWarning 避免误报
+          recoverable hydration mismatch（React #418） */}
       <p>
-        <span className="shrink-0">今天是 {currentYear} 年的第</span>
+        <span className="shrink-0" suppressHydrationWarning>
+          今天是 {currentYear} 年的第
+        </span>
         <CountUp
           to={currentDay}
           className="mx-1"
@@ -55,12 +60,12 @@ export const TimelineProgress = () => {
         />
         <span className="shrink-0">天</span>
       </p>
-      <p>
+      <p suppressHydrationWarning>
         今年已过{' '}
         <CountUp to={percentOfYear} decimals={6} duration={PROGRESS_DURATION} />
         %
       </p>
-      <p>
+      <p suppressHydrationWarning>
         今天已过{' '}
         <CountUp to={percentOfDay} decimals={6} duration={PROGRESS_DURATION} />%
       </p>
