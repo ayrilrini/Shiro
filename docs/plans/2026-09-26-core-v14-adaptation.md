@@ -179,3 +179,8 @@ Shiro 监听的全部事件（`types/events.ts`）在 v14 `BusinessEvents` 中�
 - **mx-core 空站行为（上游设计）**：站点不存在任何可见手记时，`GET /api/v3/aggregate` 因 `note.service.getLatestNoteId` 抛 `NOT_FOUND` 而整体 404，导致 Shiro 首页聚合拉取失败——发布一篇手记即恢复，非适配问题。
 - **首页 500（`Cannot read properties of undefined (reading 'webUrl')`）**：`app/[locale]/api.tsx` 的 `fetchAggregationData` 用裸 `$fetch` 直取聚合接口但**漏做 V3 信封解包**（5+1 处裸 fetch 补丁中的漏网之鱼），layout 拿到 `{data:{...}}` 信封后解构 `url` 为 undefined。已补 `unwrapV3Envelope`——这是最后一个遗留解包点。
 - **最终验证（全部通过）**：首页 200（HTML 渲染）、`/api/v3/aggregate/site` 200（V3 信封）、`/ws/web` 101 升级成功。
+
+### 8.6 部署期问题排查记录（2026-11-02）
+
+- **`/api/v3/fn/shiro/status` 404（FUNCTION_NOT_FOUND，预期行为）**：前端 header 的 `OwnerStatus` 组件（头像右下角状态 emoji）在每次页面激活时 `GET fn/shiro/status`，该端点是 **serverless 云函数片段**，需在后台「集成 → 代码片段」手动创建（官方 extra 文档部署项）：名称 `status`、引用 `shiro`、类型 `Function`、请求方式 `ALL`、Secret 键 `key`（自定义复杂密钥），函数体取官方仓库 `mx-space/snippets` 的 `shiro/functions/status.ts`。不部署不影响核心功能，仅登录后头像状态设置不可用（未登录访客无感知）。
+- **`/timeline` 等 loading 路由整页报「客户端组件渲染时报错」**：根因是 `loading_default` / `comment_placeholders` 消息值为**字符串数组**（上游 Shiro 同步引入的形态），而 next-intl 4.8.3 生产 format 路径（`format-message/index.js`）对数组消息直接 `throw new IntlError(INVALID_MESSAGE)`（无 originalMessage，与 SSR 日志 `Error: INVALID_MESSAGE` 完全吻合）。触发链：`definePrerenderPage` fetcher 挂起 → 路由级 `loading.tsx` → `FullPageLoading` → `t('loading_default')` → 抛错被 `ErrorBoundary` 捕获。所有带 `loading.tsx` 的路由（timeline/friends/notes/posts/projects/says/thinking…）均受影响。修复（7df4abd7）：三个语言包的数组消息压平为 `|` 分隔字符串；`Loading` 组件改为客户端挂载后随机（SSR 固定第一条，避免 hydration mismatch）；`getRandomPlaceholder` 适配分隔格式（调用方本就传 `t.raw`，raw 对数组不抛错、但压平后统一走普通路径更稳）。本地 production build + `next start` 实测 `/timeline` 200，Loading 文案/手记内容/统计文案均正常渲染。
