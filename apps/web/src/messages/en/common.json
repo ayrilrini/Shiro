@@ -49,16 +49,7 @@
   "login_secret_entrance": "You found a secret login entrance",
   "login_nothing_here": ", but there's nothing here",
   "login_button": "Login",
-  "loading_default": [
-    "The page is still waking.",
-    "Light reaches the words first.",
-    "A hush now. The text will follow.",
-    "The lines arrive with the breeze.",
-    "Blank space is learning to speak.",
-    "The page stirs. Meaning gathers.",
-    "Not yet fully lit, but almost.",
-    "Stay a moment. The words are near."
-  ],
+  "loading_default": "The page is still waking.|Light reaches the words first.|A hush now. The text will follow.|The lines arrive with the breeze.|Blank space is learning to speak.|The page stirs. Meaning gathers.|Not yet fully lit, but almost.|Stay a moment. The words are near.",
   "loading_video": "Loading video...",
   "loading_bilibili": "Loading Bilibili video...",
   "loading_failed": "Failed to load",
@@ -215,19 +206,7 @@
 
   "ai_key_insights": "Key Insights",
 
-  "comment_placeholders": [
-    "Say something here.",
-    "What would you like to say?",
-    "Leave your mark here",
-    "Your comment motivates me!",
-    "Say something, I'm listening.",
-    "Leave a comment, get a star!",
-    "Your comment makes me work harder!",
-    "Leave your footprint, let me know you were here.",
-    "I'm waiting for your comment!",
-    "Your comment is my greatest motivation!",
-    "Leave a comment, let me know your thoughts!"
-  ],
+  "comment_placeholders": "Say something here.|What would you like to say?|Leave your mark here|Your comment motivates me!|Say something, I'm listening.|Leave a comment, get a star!|Your comment makes me work harder!|Leave your footprint, let me know you were here.|I'm waiting for your comment!|Your comment is my greatest motivation!|Leave a comment, let me know your thoughts!",
 
   "sort_by": "Sort by...",
   "sort_default": "Default",

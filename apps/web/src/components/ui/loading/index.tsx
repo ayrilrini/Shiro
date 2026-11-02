@@ -1,6 +1,7 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
+import { useEffect, useState } from 'react'
 
 import { clsxm } from '~/lib/helper'
 
@@ -15,7 +16,14 @@ export const Loading: Component<LoadingProps> = ({
   useDefaultLoadingText = false,
 }) => {
   const t = useTranslations('common')
-  const defaultLoadingText = t('loading_default')
+  const candidates = t('loading_default').split('|')
+  // SSR 固定渲染第一条，客户端挂载后再随机，避免 hydration mismatch
+  const [index, setIndex] = useState(0)
+  useEffect(() => {
+    setIndex(Math.floor(Math.random() * candidates.length))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+  const defaultLoadingText = candidates[index] || candidates[0]
   const nextLoadingText = useDefaultLoadingText
     ? defaultLoadingText
     : loadingText
