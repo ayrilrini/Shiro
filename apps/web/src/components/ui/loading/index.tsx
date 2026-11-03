@@ -1,13 +1,43 @@
 'use client'
 
+import './index.css'
+
 import { useTranslations } from 'next-intl'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import { clsxm } from '~/lib/helper'
 
 export type LoadingProps = {
   loadingText?: string
   useDefaultLoadingText?: boolean
+}
+
+/**
+ * 星星参数用黄金角确定性分布（无随机数），保证 SSR 与客户端 hydration 一致。
+ */
+const STAR_COLORS = [
+  '#ffffff',
+  '#bcd4ff',
+  '#fff3c4',
+  '#ffd9e8',
+  '#c9f0ff',
+] as const
+
+function buildStars(count: number) {
+  return Array.from({ length: count }, (_, i) => {
+    const goldenAngle = 137.508
+    const angle = (i * goldenAngle) % 360
+    const size = 2 + (i % 3)
+    return {
+      angle,
+      size,
+      delay: (i % 7) * 0.28,
+      duration: 1.4 + (i % 5) * 0.28,
+      distance: 42 + ((i * 29) % 40),
+      color: STAR_COLORS[i % STAR_COLORS.length] as string,
+      opacity: 0.55 + ((i * 13) % 45) / 100,
+    }
+  })
 }
 
 export const Loading: Component<LoadingProps> = ({
@@ -27,14 +57,55 @@ export const Loading: Component<LoadingProps> = ({
   const nextLoadingText = useDefaultLoadingText
     ? defaultLoadingText
     : loadingText
+
+  const stars = useMemo(() => buildStars(28), [])
+
   return (
     <div
       data-hide-print
-      className={clsxm('my-20 flex flex-col center', className)}
+      className={clsxm(
+        'space-loading-scene my-20 flex flex-col center rounded-3xl',
+        'min-h-[46vmin]',
+        className,
+      )}
     >
-      <span className="loading loading-ball loading-lg" />
+      {/* warp 星空 */}
+      <div
+        className="pointer-events-none absolute inset-0 overflow-hidden"
+        aria-hidden
+      >
+        {stars.map((star, i) => (
+          <span
+            key={i}
+            className="space-warp-star"
+            style={
+              {
+                '--star-angle': `${star.angle}deg`,
+                '--star-size': `${star.size}px`,
+                '--star-delay': `${star.delay}s`,
+                '--star-duration': `${star.duration}s`,
+                '--star-distance': `${star.distance}vmin`,
+                '--star-color': star.color,
+                '--star-opacity': star.opacity,
+              } as React.CSSProperties
+            }
+          />
+        ))}
+      </div>
+
+      {/* 宇宙飞船 */}
+      <div className="space-ship-group" aria-hidden>
+        <div className="relative">
+          <div className="space-ship-trail-glow" />
+          <div className="space-ship-trail" />
+          <span className="space-ship-body">🚀</span>
+        </div>
+      </div>
+
       {!!nextLoadingText && (
-        <span className="mt-6 block">{nextLoadingText}</span>
+        <span className="relative z-10 mt-8 block text-sm text-white/70">
+          {nextLoadingText}
+        </span>
       )}
     </div>
   )
