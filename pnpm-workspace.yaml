@@ -1,3 +1,15 @@
 packages:
   - "apps/*"
   - "packages/*"
+
+# 统一 lexical 版本：@haklex/rich-* 0.0.105 需要 0.42（StateConfig 节点机制），
+# 而 Shiro 直接依赖的 0.41 会让 rich-headless 的 peer 被 0.41 满足，
+# 与 rich-kit-shiro 的 0.42 混用导致 Lexical #290（heading getType 未注册）。
+overrides:
+  lexical: "0.42.0"
+  "@lexical/code": "0.42.0"
+  "@lexical/link": "0.42.0"
+  "@lexical/list": "0.42.0"
+  "@lexical/markdown": "0.42.0"
+  "@lexical/react": "0.42.0"
+  "@lexical/rich-text": "0.42.0"
