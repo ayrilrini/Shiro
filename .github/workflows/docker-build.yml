@@ -56,23 +56,25 @@ jobs:
             exit 1
           fi
 
-      - name: Build and push
-        uses: docker/build-push-action@v6
+      # next/font/google 在构建期从 fonts.googleapis.com / fonts.gstatic.com 下载字体，
+      # GitHub runner 偶发网络抖动会导致 Turbopack module-not-found 报错使整个构建失败，
+      # 因此对 build 命令整体做最多 3 次自动重试。
+      - name: Build and push (retry on transient font fetch failure)
+        uses: nick-fields/retry@v3
         with:
-          context: .
-          push: true
-          # 阿里云 ACR 不接受 OCI attestation 的 application/vnd.oci.empty.v1+json
-          # （denied: unknown manifest class），必须禁用 provenance 证明
-          provenance: false
-          # 前端运行时对外地址（NEXT_PUBLIC_* 构建期内联，改域名需同步改这里）
-          build-args: |
-            BASE_URL=https://www.voidink.tech
-          tags: |
-            ${{ env.ACR_REGISTRY }}/${{ env.ACR_NAMESPACE }}/shiro-v14:latest
-            ${{ env.ACR_REGISTRY }}/${{ env.ACR_NAMESPACE }}/shiro-v14:${{ github.sha }}
-          # 用 GitHub 缓存加速后续构建（apk/pnpm/字体层全部复用）
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          timeout_minutes: 40
+          max_attempts: 3
+          retry_wait_seconds: 60
+          command: |
+            docker buildx build \
+              --push \
+              --provenance=false \
+              --build-arg "BASE_URL=https://www.voidink.tech" \
+              --cache-from type=gha \
+              --cache-to type=gha,mode=max \
+              -t "${ACR_REGISTRY}/${ACR_NAMESPACE}/shiro-v14:latest" \
+              -t "${ACR_REGISTRY}/${ACR_NAMESPACE}/shiro-v14:${GITHUB_SHA}" \
+              .
 
       - name: Image digest
         run: echo "Pushed ${{ env.ACR_REGISTRY }}/${{ env.ACR_NAMESPACE }}/shiro-v14:${{ github.sha }}"
